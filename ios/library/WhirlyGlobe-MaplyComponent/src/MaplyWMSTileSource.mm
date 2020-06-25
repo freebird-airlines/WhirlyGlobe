@@ -336,11 +336,14 @@
     bool wasCached = false;
     NSString *fileName = nil;
     // Look for the image in the cache first
+    NSLog(@"%@-%d", [self cacheFileForTile:tileID], cacheInit);
     if (_cacheDir)
     {
         fileName = [self cacheFileForTile:tileID];
         imgData = [NSData dataWithContentsOfFile:fileName];
-        wasCached = true;
+        if (imgData != nil) {
+            wasCached = true;
+        }
     }
     
     if (!imgData)
@@ -389,8 +392,10 @@
     }
     
     // Let's also write it back out for the cache
-    if (_cacheDir && !wasCached)
+    if (_cacheDir && !wasCached) {
+        NSLog(@"set cache");
         [imgData writeToFile:fileName atomically:YES];
+    }
     
     return imgData;
 }
