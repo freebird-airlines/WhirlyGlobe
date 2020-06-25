@@ -605,7 +605,16 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
         // The hierarchy and view/layer values were discovered by inspecting map kit using Reveal.app
         
         self.containerView = [UIView new];
-        self.containerView.backgroundColor = [UIColor whiteColor];
+        
+        BOOL isNight = [SMCalloutMaskedBackgroundView IsNight];
+        
+        if(isNight) {
+            self.containerView.backgroundColor = [UIColor colorWithRed: 0.12 green: 0.13 blue: 0.14 alpha: 1.0];
+        } else {
+            self.containerView.backgroundColor = [UIColor whiteColor];
+        }
+        
+        
         self.containerView.alpha = 0.96;
         self.containerView.layer.cornerRadius = 8;
         self.containerView.layer.shadowRadius = 30;
@@ -627,7 +636,20 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
         
         self.arrowView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, blackArrowImage.size.width, blackArrowImage.size.height)];
         self.arrowView.alpha = 0.96;
-        self.arrowImageView = [[UIImageView alloc] initWithImage:whiteArrowImage];
+        
+
+        if(isNight) {
+            UIImage *newImage = [whiteArrowImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+            UIGraphicsBeginImageContextWithOptions(whiteArrowImage.size, NO, newImage.scale);
+            [[UIColor colorWithRed: 0.12 green: 0.13 blue: 0.14 alpha: 1.0] set];
+            [newImage drawInRect:CGRectMake(0, 0, whiteArrowImage.size.width, newImage.size.height)];
+            newImage = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
+            self.arrowImageView = [[UIImageView alloc] initWithImage:newImage];
+        } else {
+            self.arrowImageView = [[UIImageView alloc] initWithImage:whiteArrowImage];
+        }
+        
         self.arrowHighlightedImageView = [[UIImageView alloc] initWithImage:grayArrowImage];
         self.arrowHighlightedImageView.hidden = YES;
         self.arrowBorderView = [[UIImageView alloc] initWithImage:blackArrowImage];
@@ -643,6 +665,19 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
     }
     return self;
 }
+
++ (BOOL) IsNight {
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"HH.mm"];
+    NSString *strCurrentTime = [dateFormatter stringFromDate:[NSDate date]];
+    
+    if ([strCurrentTime floatValue] >= 19.00 || [strCurrentTime floatValue]  <= 5.00){
+        return NO;
+    }
+    
+    return NO;
+}
+
 
 // Make sure we relayout our images when our arrow point changes!
 - (void)setArrowPoint:(CGPoint)arrowPoint {
