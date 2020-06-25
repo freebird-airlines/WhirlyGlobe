@@ -197,7 +197,7 @@
 
 + (NSString *)CapabilitiesURLFor:(NSString *)baseURL
 {
-    return [NSString stringWithFormat:@"%@?Service=WMS&Request=GetCapabilities&Version=1.1.1",baseURL];
+    return [NSString stringWithFormat:@"%@?Service=WMS&Request=GetCapabilities&Version=1.3.0",baseURL];
 }
 
 - (instancetype)initWithXML:(DDXMLDocument *)xmlDoc
