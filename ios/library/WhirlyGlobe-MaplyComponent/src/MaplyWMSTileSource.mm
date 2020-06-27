@@ -336,7 +336,6 @@
     bool wasCached = false;
     NSString *fileName = nil;
     // Look for the image in the cache first
-    NSLog(@"%@-%d", [self cacheFileForTile:tileID], cacheInit);
     if (_cacheDir)
     {
         fileName = [self cacheFileForTile:tileID];
