@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "WhirlyGlobe"
-  s.version          = "2.6.9"
+  s.version          = "2.7.0"
   s.summary          = "WhirlyGlobe-Maply: Geospatial visualization for iOS and Android."
   s.description      = <<-DESC
                         WhirlyGlobe-Maply is a high performance geospatial display toolkit for iOS and Android.
