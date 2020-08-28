@@ -52,11 +52,11 @@ import static com.mousebird.maply.MaplyBaseController.TextureSettings.FilterType
  * <p>
  * Most of the functionality is shared between the 2D and 3D maps and so it is
  * implemented here.
- * 
+ *
  * @author sjg
  *
  */
-public class MaplyBaseController 
+public class MaplyBaseController
 {
 	// This may be a GLSurfaceView or a GLTextureView
 	View baseView = null;
@@ -76,17 +76,17 @@ public class MaplyBaseController
 
 	// When adding features we can run on the current thread or delay the work till layter
 	public enum ThreadMode {ThreadCurrent,ThreadAny};
-	
+
 	// Represents an ID that doesn't have data associated with it
 	public static long EmptyIdentity = 0;
-	
+
 	// Draw priority defaults
 	public static final int ImageLayerDrawPriorityDefault = 100;
 	public static final int FeatureDrawPriorityBase = 20000;
 	public static final int MarkerDrawPriorityDefault = 40000;
 	public static final int LabelDrawPriorityDefault = 60000;
 	public static final int ParticleDrawPriorityDefault = 1000;
-	
+
 	/**
 	 * This is how often we'll kick off a render when the frame sync comes in.
 	 * We get a notification when the render for a given frame starts, this is
@@ -100,7 +100,7 @@ public class MaplyBaseController
 	 * being kept around for selection.
 	 */
 	public boolean disposeAfterRemoval = false;
-	
+
 	// Set when we're not in the process of shutting down
 	boolean running = false;
 
@@ -109,7 +109,7 @@ public class MaplyBaseController
 
 	// Coordinate system to display conversion
 	protected CoordSystemDisplayAdapter coordAdapter;
-	
+
 	// Scene stores the objects
 	public Scene scene = null;
 
@@ -165,7 +165,7 @@ public class MaplyBaseController
 		}
 		return httpClient;
 	}
-	
+
 	// MapView defines how we're looking at the data
 	protected com.mousebird.maply.View view = null;
 
@@ -185,14 +185,14 @@ public class MaplyBaseController
 
 	// Manage bitmaps and their conversion to textures
 	TextureManager texManager = new TextureManager();
-	
+
 	// Layer thread we use for data manipulation
 	ArrayList<LayerThread> layerThreads = new ArrayList<LayerThread>();
 	ArrayList<LayerThread> workerThreads = new ArrayList<LayerThread>();
-		
+
 	// Bounding box we're allowed to move within
 	Point2d viewBounds[] = null;
-	
+
 	/**
 	 * Returns the layer thread we used for processing requests.
 	 */
@@ -312,7 +312,7 @@ public class MaplyBaseController
 	}
 
 	ColorDrawable tempBackground = null;
-	
+
 	protected void Init()
 	{
 		if (!libraryLoaded)
@@ -339,13 +339,13 @@ public class MaplyBaseController
 		renderWrapper = new RendererWrapper(this);
 		renderWrapper.scene = scene;
 		renderWrapper.view = view;
-		
+
 		// Create the layer thread
         LayerThread layerThread = new LayerThread("Maply Layer Thread",view,scene,true);
 		synchronized (layerThreads) {
 			layerThreads.add(layerThread);
 		}
-		
+
         ActivityManager activityManager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
         ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
 
@@ -410,82 +410,9 @@ public class MaplyBaseController
         } else {
         	Toast.makeText(activity,  "This device does not support OpenGL ES 2.0.", Toast.LENGTH_LONG).show();
         	return;
-        }   
-        
+        }
+
 		running = true;
-
-        startAnalytics();
-	}
-
-	// Kick off the analytics logic.
-	private void startAnalytics()
-	{
-		SharedPreferences prefs = activity.getSharedPreferences("WGMaplyPrefs", Context.MODE_PRIVATE);
-
-		// USER ID is a random string.  Only used for deconfliction.  No unique information here.
-		String userID = prefs.getString("wgmaplyanalyticuser", null);
-		if (userID == null) {
-			UUID uuid = UUID.randomUUID();
-			userID = uuid.toString();
-			SharedPreferences.Editor editor = prefs.edit();
-			editor.putString("wgmaplyanalyticuser", userID);
-			editor.apply();
-		}
-
-		// Send it once a month at most
-		long lastSent = prefs.getLong("wgmaplyanalytictime2", 0);
-		final long now = new Date().getTime()/1000;
-		final long howLong = now - lastSent;
-		if (howLong > 30*24*60*60) {
-			PackageInfo pInfo;
-			try {
-				pInfo = activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0);
-			}
-			catch (Exception e) {
-				return;
-			}
-
-			// We're not recording anything that can identify the user, just the app
-			// create table register( userid VARCHAR(50), bundleid VARCHAR(100), bundlename VARCHAR(100), bundlebuild VARCHAR(100), bundleversion VARCHAR(100), osversion VARCHAR(20), model VARCHAR(100), wgmaplyversion VARCHAR(20));
-			String bundleID = activity.getPackageName();
-			String bundleName = pInfo.packageName;
-			String bundleBuild = "unknown";
-			String bundleVersion = pInfo.versionName;
-			String osversion = "Android " + Build.VERSION.RELEASE.toString();
-			String model = Build.MANUFACTURER + " " + Build.MODEL;
-			String wgMaplyVersion = "2.6.2";
-			String json = String.format(
-					"{ \"userid\":\"%s\", \"bundleid\":\"%s\", \"bundlename\":\"%s\", \"bundlebuild\":\"%s\", \"bundleversion\":\"%s\", \"osversion\":\"%s\", \"model\":\"%s\", \"wgmaplyversion\":\"%s\" }",
-					userID, bundleID, bundleName, bundleBuild, bundleVersion, osversion, model, wgMaplyVersion);
-
-			RequestBody body = RequestBody.create(MediaType.parse("application/json"),json);
-			if (body == null)
-				return;
-			Request request = new Request.Builder()
-					.url("http://analytics.mousebirdconsulting.com:8081/register")
-					.post(body)
-					.build();
-			if (request == null)
-				return;
-
-			OkHttpClient client = new OkHttpClient();
-			client.newCall(request).enqueue(new Callback() {
-				@Override
-				public void onFailure(Request request, IOException e) {
-				}
-
-				@Override
-				public void onResponse(Response response) throws IOException {
-					// We got a response, so save that in prefs
-					if (activity != null) {
-						SharedPreferences prefs = activity.getSharedPreferences("WGMaplyPrefs", Context.MODE_PRIVATE);
-						SharedPreferences.Editor editor = prefs.edit();
-						editor.putLong("wgmaplyanalytictime2", now);
-						editor.apply();
-					}
-				}
-			});
-		}
 	}
 
 	/**
@@ -525,7 +452,7 @@ public class MaplyBaseController
 
 		return pt;
 	}
-	
+
 	/**
 	 * Return the main content view used to represent the Maply Control.
 	 */
@@ -543,7 +470,7 @@ public class MaplyBaseController
 			return new Point2d(0,0);
 		return new Point2d(baseView.getWidth(),baseView.getHeight());
 	}
-	
+
 	/**
 	 * Call shutdown when you're done with the MaplyController.  It will shut down the layer
 	 * thread(s) and all the associated logic.
@@ -663,9 +590,9 @@ public class MaplyBaseController
 			tempBackground = null;
 		}
 	}
-	
+
 	ArrayList<Runnable> surfaceTasks = new ArrayList<Runnable>();
-	
+
 	// Metronome thread used to time the renderer
 	protected MetroThread metroThread;
 
@@ -947,7 +874,7 @@ public class MaplyBaseController
 
         return false;
     }
-	
+
 	/**
 	 * It takes a little time to set up the OpenGL ES drawable.  Add a runnable
 	 * to be run after the surface is created.  If it's already been created we
@@ -962,7 +889,7 @@ public class MaplyBaseController
 		else
 			run.run();
 	}
-			
+
 	int clearColor = Color.BLACK;
 
 	/**
@@ -1004,7 +931,7 @@ public class MaplyBaseController
 		if (coordAdapter == null)
 			return;
 		CoordSystem coordSys = coordAdapter.getCoordSystem();
-		
+
 		viewBounds = new Point2d[4];
 		viewBounds[0] = coordAdapter.localToDisplay(coordSys.geographicToLocal(new Point3d(ll.getX(),ll.getY(),0.0))).toPoint2d();
 		viewBounds[1] = coordAdapter.localToDisplay(coordSys.geographicToLocal(new Point3d(ur.getX(),ll.getY(),0.0))).toPoint2d();
@@ -1050,7 +977,7 @@ public class MaplyBaseController
 		return coordAdapter.geoPointFromScreenBatch(view,(int)frameSize.getX(),(int)frameSize.getY(),
 				inX,inY,outX,outY);
 	}
-		
+
 	int perfInterval = 0;
 	/**
 	 * Report performance stats in the console ever few frames.
@@ -1148,7 +1075,7 @@ public class MaplyBaseController
 			}
 		}
 	}
-	
+
 	/**
 	 * Remove a single layer.  The layer will stop receiving data and be shut down shortly
 	 * after you call this.
@@ -1172,11 +1099,11 @@ public class MaplyBaseController
 			}
 		}
 	}
-	
+
 	/**
 	 * Add a task according to the thread mode.  If it's ThreadAny, we'll put it on the layer thread.
 	 * If it's ThreadCurrent, we'll do it immediately.
-	 * 
+	 *
 	 * @param run Runnable to execute.
 	 * @param mode Where to execute it.
 	 */
@@ -1251,7 +1178,7 @@ public class MaplyBaseController
 	 * Add vectors to the MaplyController to display.  Vectors are linear or areal
 	 * features with line width, filled style, color and so forth defined by the
 	 * VectorInfo class.
-	 * 
+	 *
 	 * @param vecs A list of VectorObject's created by the user or read in from various sources.
 	 * @param vecInfo A description of how the vectors should look.
 	 * @param mode Where to execute the add.  Choose ThreadAny by default.
@@ -1264,11 +1191,11 @@ public class MaplyBaseController
 			return null;
 
 		final ComponentObject compObj = addComponentObj();
-		
+
 		// Do the actual work on the layer thread
 		Runnable run =
 		new Runnable()
-		{		
+		{
 			@Override
 			public void run()
 			{
@@ -1295,9 +1222,9 @@ public class MaplyBaseController
 							vecObj.dispose();
 			}
 		};
-		
+
 		addTask(run, mode);
-				
+
 		return compObj;
 	}
 
@@ -1480,14 +1407,14 @@ public class MaplyBaseController
 	 * Add screen markers to the visual display.  Screen markers are 2D markers that sit
 	 * on top of the screen display, rather than interacting with the geometry.  Their
 	 * visual look is defined by the MarkerInfo class.
-	 * 
+	 *
 	 * @param markers The markers to add to the display
 	 * @param markerInfo How the markers should look.
 	 * @param mode Where to execute the add.  Choose ThreadAny by default.
 	 * @return This represents the screen markers for later modification or deletion.
 	 */
 	public ComponentObject addScreenMarkers(final List<ScreenMarker> markers,final MarkerInfo markerInfo,ThreadMode mode)
-	{		
+	{
 		if (!running)
 			return null;
 
@@ -1496,12 +1423,12 @@ public class MaplyBaseController
 		// Do the actual work on the layer thread
 		Runnable run =
 		new Runnable()
-		{		
+		{
 			@Override
 			public void run()
 			{
 				ChangeSet changes = new ChangeSet();
-		
+
 				// Convert to the internal representation of the engine
 				ArrayList<InternalMarker> intMarkers = new ArrayList<InternalMarker>();
 				for (ScreenMarker marker : markers)
@@ -1523,9 +1450,9 @@ public class MaplyBaseController
 						intMarker.addTexID(texID);
 					if (marker.vertexAttributes != null)
 						intMarker.setVertexAttributes(marker.vertexAttributes.toArray());
-					
+
 					intMarkers.add(intMarker);
-					
+
 					// Keep track of this one for selection
 					if (marker.selectable)
 					{
@@ -1547,7 +1474,7 @@ public class MaplyBaseController
 					marker.dispose();
 			}
 		};
-		
+
 		addTask(run, mode);
 
 		return compObj;
@@ -1800,7 +1727,7 @@ public class MaplyBaseController
 	}
 
 		Map<Long, Object> selectionMap = new HashMap<Long, Object>();
-	
+
 	// Add selectable objects to the list
 	private void addSelectableObject(long selectID,Object selObj,ComponentObject compObj)
 	{
@@ -1810,7 +1737,7 @@ public class MaplyBaseController
 			selectionMap.put(selectID,selObj);
 		}
 	}
-	
+
 	// Remove selectable objects
 	private void removeSelectableObjects(ComponentObject compObj)
 	{
@@ -1952,7 +1879,7 @@ public class MaplyBaseController
 	{
 		if (!running)
 			return null;
-		
+
 		ArrayList<ScreenLabel> labels = new ArrayList<ScreenLabel>();
 		labels.add(label);
 		return addScreenLabels(labels,labelInfo,mode);
@@ -1962,7 +1889,7 @@ public class MaplyBaseController
 	 * Add screen labels to the display.  Screen labels are 2D labels that float above the 3D geometry
 	 * and stay fixed in size no matter how the user zoom in or out.  Their visual appearance is controlled
 	 * by the LabelInfo class.
-	 * 
+	 *
 	 * @param labels Labels to add to the display.
 	 * @param labelInfo The visual appearance of the labels.
 	 * @param mode Where to execute the add.  Choose ThreadAny by default.
@@ -1978,12 +1905,12 @@ public class MaplyBaseController
 		// Do the actual work on the layer thread
 		Runnable run =
 		new Runnable()
-		{		
+		{
 			@Override
 			public void run()
 			{
 				ChangeSet changes = new ChangeSet();
-				
+
 				// Convert to the internal representation for the engine
 				ArrayList<InternalLabel> intLabels = new ArrayList<InternalLabel>();
 				for (ScreenLabel label : labels)
@@ -2017,9 +1944,9 @@ public class MaplyBaseController
 					label.dispose();
 			}
 		};
-		
+
 		addTask(run, mode);
-		
+
 		return compObj;
 	}
 
@@ -2090,7 +2017,7 @@ public class MaplyBaseController
 
         return texture;
     }
-    
+
     	/**
 	 * Create an empty texture of the given size.
 	 * @param width Width of the resulting texture
@@ -2332,7 +2259,7 @@ public class MaplyBaseController
 	 * Disable the given objects. These were the objects returned by the various
 	 * add calls.  Once called, the objects will be invisible, but can be made
 	 * visible once again with enableObjects()
-	 * 
+	 *
 	 * @param compObjs Objects to disable in the display.
 	 * @param mode Where to execute the add.  Choose ThreadAny by default.
 	 */
@@ -2348,7 +2275,7 @@ public class MaplyBaseController
 
 		final MaplyBaseController control = this;
 		Runnable run = new Runnable()
-		{		
+		{
 			@Override
 			public void run()
 			{
@@ -2360,7 +2287,7 @@ public class MaplyBaseController
 					changes.process(scene);
 			}
 		};
-		
+
 		addTask(run, mode);
 	}
 
@@ -2397,11 +2324,11 @@ public class MaplyBaseController
 			return;
 
 		final ComponentObject[] localCompObjs = compObjs.toArray(new ComponentObject[compObjs.size()]);
-		
+
 		final MaplyBaseController control = this;
-		Runnable run = 
+		Runnable run =
 		new Runnable()
-		{		
+		{
 			@Override
 			public void run()
 			{
@@ -2413,7 +2340,7 @@ public class MaplyBaseController
 					changes.process(scene);
 			}
 		};
-		
+
 		addTask(run, mode);
 	}
 
@@ -2453,7 +2380,7 @@ public class MaplyBaseController
 	/**
 	 * Remove the given component objects from the display.  This will permanently remove them
 	 * from Maply.  The component objects were returned from the various add calls.
-	 * 
+	 *
 	 * @param compObjs Component Objects to remove.
 	 * @param mode Where to execute the add.  Choose ThreadAny by default.
 	 */
@@ -2464,10 +2391,10 @@ public class MaplyBaseController
 
 		if (compObjs == null || compObjs.size() == 0)
 			return;
-		
+
 		final MaplyBaseController control = this;
 		Runnable run = new Runnable()
-		{		
+		{
 			@Override
 			public void run()
 			{
@@ -2483,10 +2410,10 @@ public class MaplyBaseController
 					changes.process(scene);
 			}
 		};
-		
+
 		addTask(run, mode);
 	}
-	
+
     private boolean isProbablyEmulator() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1
                 && (Build.FINGERPRINT.startsWith("generic")
