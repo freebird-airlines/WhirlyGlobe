@@ -667,13 +667,15 @@ static UIImage *blackArrowImage = nil, *whiteArrowImage = nil, *grayArrowImage =
 }
 
 + (BOOL) IsNight {
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    /*NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"HH.mm"];
     NSString *strCurrentTime = [dateFormatter stringFromDate:[NSDate date]];
     
     if ([strCurrentTime floatValue] >= 19.00 || [strCurrentTime floatValue]  <= 5.00){
         return NO;
     }
+    
+    return NO;*/
     
     return NO;
 }
