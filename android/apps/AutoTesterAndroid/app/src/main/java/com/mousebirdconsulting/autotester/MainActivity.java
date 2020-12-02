@@ -3,15 +3,12 @@ package com.mousebirdconsulting.autotester;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Debug;
-
-import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.Fragment;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -115,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawer.
 		setSupportActionBar(toolbar);
 
 		//Add home button
-		ActionBar actionBar = getSupportActionBar();
+		androidx.appcompat.app.ActionBar actionBar = getSupportActionBar();
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 			actionBar.setDisplayShowTitleEnabled(true);

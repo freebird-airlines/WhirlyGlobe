@@ -89,15 +89,6 @@ public class MapGestureHandler
 	}
 
 	/**
-	 * Set minimal allowed height above surface
-	 *
-	 * @param minHeightAboveSurface
-	 */
-	public void setMinHeightAboveSurface(double minHeightAboveSurface) {
-		mapView.setMinHeightAboveSurface(minHeightAboveSurface);
-	}
-
-	/**
 	 * Check that a given position will be within the given bounds.
 	 * This is used by the various gestures for bounds checking.
 	 * 
@@ -335,7 +326,7 @@ public class MapGestureHandler
 			double accel = - modelVel / (AnimMomentumTime * AnimMomentumTime);
 			
 			// Now kick off the animation
-			mapView.setAnimationDelegate(new MapAnimateTranslateMomentum(mapView, mapControl.renderWrapper.maplyRender, modelVel, accel, dir, maplyControl.viewBounds));
+			mapView.setAnimationDelegate(new MapAnimateTranslateMomentum(mapView, mapControl.renderWrapper.maplyRender.get(), modelVel, accel, dir, maplyControl.viewBounds));
 		
 			isActive = false;
 			
@@ -409,7 +400,7 @@ public class MapGestureHandler
 			loc.setValue(locPt.getX(), locPt.getY(), newZ);
 			
 			// Now kick off the animation
-			mapView.setAnimationDelegate(new MapAnimateTranslate(mapView, mapControl.renderWrapper.maplyRender, loc, (float) 0.1, maplyControl.viewBounds));
+			mapView.setAnimationDelegate(new MapAnimateTranslate(mapView, mapControl.renderWrapper.maplyRender.get(), loc, (float) 0.1, maplyControl.viewBounds));
 			isActive = false;
 			
 			return true;
@@ -486,7 +477,7 @@ public class MapGestureHandler
 					loc.setValue(loc.getX(), loc.getY(), newZ);
 
 					// Now kick off the animation
-					mapView.setAnimationDelegate(new MapAnimateTranslate(mapView, mapControl.renderWrapper.maplyRender, loc, (float) 0.1, mapControl.viewBounds));
+					mapView.setAnimationDelegate(new MapAnimateTranslate(mapView, mapControl.renderWrapper.maplyRender.get(), loc, (float) 0.1, mapControl.viewBounds));
 
 					sl.isActive = false;
 					gl.isActive = false;
