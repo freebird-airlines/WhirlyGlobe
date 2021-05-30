@@ -795,6 +795,9 @@ bool VectorParseCoords(VectorRing &coords,NSArray *coordArray)
     if (![coordArray isKindOfClass:[NSArray class]])
         return false;
     
+    if([coordArray count] == 0)
+        return false;
+    
     // Look at the type of the first object.  If it's not an array, we've got a coord.
     NSObject *firstObj = [coordArray objectAtIndex:0];
     if (![firstObj isKindOfClass:[NSArray class]])
