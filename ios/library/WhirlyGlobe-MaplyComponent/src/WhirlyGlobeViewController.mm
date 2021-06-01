@@ -1017,6 +1017,31 @@ using namespace WhirlyGlobe;
         // The user selected something, so let the delegate know
         if ([_delegate respondsToSelector:@selector(globeViewController:allSelect:atLoc:onScreen:)])
             [_delegate globeViewController:self allSelect:selectedObjs atLoc:coord onScreen:msg.touchLoc];
+	    
+	    MaplySelectedObject *selectVecObj = nil;
+            MaplySelectedObject *selObj = nil;
+            // If the selected objects are vectors, use the draw priority
+            for (MaplySelectedObject *whichObj in selectedObjs)
+            {
+                if ([whichObj.selectedObj isKindOfClass:[MaplyVectorObject class]])
+                {
+                    MaplyVectorObject *vecObj0 = selectVecObj.selectedObj;
+                    MaplyVectorObject *vecObj1 = whichObj.selectedObj;
+                    if (!vecObj0 || ([vecObj1.attributes[kMaplyDrawPriority] intValue] > [vecObj0.attributes[kMaplyDrawPriority] intValue]))
+                        selectVecObj = whichObj;
+                } else {
+                    // If there's a non-vector object just pick it
+                    selectVecObj = nil;
+                    selObj = whichObj;
+                    break;
+                }
+            }
+            
+            if (selectVecObj)
+                selObj = selectVecObj;
+            
+            if (_delegate && [_delegate respondsToSelector:@selector(globeViewController:didSelect:)])
+                [_delegate globeViewController:self didSelect:selObj.selectedObj];
         else {
             MaplySelectedObject *selectVecObj = nil;
             MaplySelectedObject *selObj = nil;
