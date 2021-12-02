@@ -142,6 +142,8 @@
 /// Optional style we're using
 @property (nonatomic,strong,nonnull) MaplyWMSStyle *style;
 
+@property (nonatomic,strong) NSDictionary * _Nullable parameters;
+
 /// Minimum zoom level we'll expect
 @property (nonatomic,readonly) int minZoom;
 /// Maximum zoom level we'll expect
@@ -180,6 +182,8 @@
     @param maxZoom The max zoom level we'll query.
   */
 - (nullable instancetype)initWithBaseURL:(NSString *__nonnull)baseURL capabilities:(MaplyWMSCapabilities *__nullable)cap layer:(MaplyWMSLayer *__nonnull)layer style:(MaplyWMSStyle *__nonnull)style coordSys:(MaplyCoordinateSystem *__nonnull)coordSys minZoom:(int)minZoom maxZoom:(int)maxZoom tileSize:(int)tileSize;
+
+- (nullable instancetype)initWithBaseURL:(NSString *__nonnull)baseURL capabilities:(MaplyWMSCapabilities *__nullable)cap layer:(MaplyWMSLayer *__nonnull)layer style:(MaplyWMSStyle *__nonnull)style coordSys:(MaplyCoordinateSystem *__nonnull)coordSys minZoom:(int)minZoom maxZoom:(int)maxZoom tileSize:(int)tileSize parameters:(NSDictionary*_Nullable) parameters;
 
 @end
 
