@@ -299,6 +299,31 @@
     return self;
 }
 
+- (instancetype)initWithBaseURL:(NSString *)baseURL capabilities:(MaplyWMSCapabilities *)cap layer:(MaplyWMSLayer *)layer style:(MaplyWMSStyle *)style coordSys:(MaplyCoordinateSystem *)coordSys minZoom:(int)minZoom maxZoom:(int)maxZoom tileSize:(int)tileSize parameters:(NSDictionary *)parameters
+{
+    self = [super init];
+    
+    if (!layer.name)
+        return nil;
+    
+    _capabilities = cap;
+    _baseURL = baseURL;
+    _minZoom = minZoom;
+    _maxZoom = maxZoom;
+    _coordSys = coordSys;
+    _layer = layer;
+    _style = style;
+    _tileSize = 256;
+    _imageType = @"image/png";
+    _transparent = false;
+    _parameters = parameters;
+    
+    // Note: Should check the image type is there
+    
+    return self;
+}
+
+
 // Figure out the name for the tile, if it's local
 - (NSString *)cacheFileForTile:(MaplyTileID)tileID
 {
@@ -367,6 +392,13 @@
         NSMutableString *reqStr = [NSMutableString stringWithFormat:@"%@&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=%@&STYLES=&SRS=%@&BBOX=%f,%f,%f,%f&WIDTH=%d&HEIGHT=%d&FORMAT=%@&TRANSPARENT=%@",_baseURL,layerStr,srsStr,tileLL.x,tileLL.y,tileUR.x,tileUR.y,_tileSize,_tileSize,_imageType,(_transparent ? @"true" : @"false")];
         if (_style)
             [reqStr appendFormat:@"&STYLES=%@",_style.name];
+            
+        if(_parameters)
+            for (id key in _parameters) {
+                id value = [_parameters objectForKey:key];
+                [reqStr appendFormat:@"&%@=%@",key, value];
+            }
+            
         NSString *fullReqStr = [reqStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSURLRequest *urlReq = [NSURLRequest requestWithURL:[NSURL URLWithString:fullReqStr]];
         
