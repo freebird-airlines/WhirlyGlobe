@@ -290,7 +290,7 @@
     _coordSys = coordSys;
     _layer = layer;
     _style = style;
-    _tileSize = 256;
+    _tileSize = tileSize;
     _imageType = @"image/png";
     _transparent = false;
     
@@ -313,7 +313,7 @@
     _coordSys = coordSys;
     _layer = layer;
     _style = style;
-    _tileSize = 256;
+    _tileSize = tileSize;
     _imageType = @"image/png";
     _transparent = false;
     _parameters = parameters;
