@@ -338,7 +338,15 @@
         cacheInit = true;
     }
     
-    NSString *localName = [NSString stringWithFormat:@"%@/%d_%d_%d",_cacheDir,tileID.level,tileID.x,tileID.y];
+    NSString *localName = nil;
+    
+    if(_parameters != nil && _parameters[@"TIME"] != nil) {
+        localName = [NSString stringWithFormat:@"%@/%@/%d_%d_%d",_cacheDir,_parameters[@"TIME"],tileID.level,tileID.x,tileID.y];
+    } else {
+        localName = [NSString stringWithFormat:@"%@/%d_%d_%d",_cacheDir,tileID.level,tileID.x,tileID.y];
+    }
+    
+    NSLog(@"local: %@", localName);
     return localName;
 }
 
