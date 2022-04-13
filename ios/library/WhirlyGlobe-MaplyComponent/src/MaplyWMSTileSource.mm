@@ -400,7 +400,14 @@
             }
             
         NSString *fullReqStr = [reqStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSURLRequest *urlReq = [NSURLRequest requestWithURL:[NSURL URLWithString:fullReqStr]];
+        NSLog(@"url: %@", fullReqStr);
+        NSMutableURLRequest *urlReq = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:fullReqStr]];
+        
+        if ([_parameters objectForKey:@"auth-key"]) {
+            //"Authorization": "Bearer \(OneKitSession.shared.user!.token)",
+            NSLog(@"token-----");
+            [urlReq setValue:[NSString stringWithFormat:@"Bearer %@", _parameters[@"auth-key"]] forHTTPHeaderField:@"Authorization"];
+        }
         
         // Fetch the image synchronously
         NSURLResponse *resp = nil;
