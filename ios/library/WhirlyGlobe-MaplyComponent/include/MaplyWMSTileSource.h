@@ -144,6 +144,8 @@
 
 @property (nonatomic,strong) NSDictionary * _Nullable parameters;
 
+@property (nonatomic,strong) NSDictionary * _Nullable headers;
+
 /// Minimum zoom level we'll expect
 @property (nonatomic,readonly) int minZoom;
 /// Maximum zoom level we'll expect
@@ -183,7 +185,7 @@
   */
 - (nullable instancetype)initWithBaseURL:(NSString *__nonnull)baseURL capabilities:(MaplyWMSCapabilities *__nullable)cap layer:(MaplyWMSLayer *__nonnull)layer style:(MaplyWMSStyle *__nonnull)style coordSys:(MaplyCoordinateSystem *__nonnull)coordSys minZoom:(int)minZoom maxZoom:(int)maxZoom tileSize:(int)tileSize;
 
-- (nullable instancetype)initWithBaseURL:(NSString *__nonnull)baseURL capabilities:(MaplyWMSCapabilities *__nullable)cap layer:(MaplyWMSLayer *__nonnull)layer style:(MaplyWMSStyle *__nonnull)style coordSys:(MaplyCoordinateSystem *__nonnull)coordSys minZoom:(int)minZoom maxZoom:(int)maxZoom tileSize:(int)tileSize parameters:(NSDictionary*_Nullable) parameters;
+- (nullable instancetype)initWithBaseURL:(NSString *__nonnull)baseURL capabilities:(MaplyWMSCapabilities *__nullable)cap layer:(MaplyWMSLayer *__nonnull)layer style:(MaplyWMSStyle *__nonnull)style coordSys:(MaplyCoordinateSystem *__nonnull)coordSys minZoom:(int)minZoom maxZoom:(int)maxZoom tileSize:(int)tileSize parameters:(NSDictionary*_Nullable) parameters headers:(NSDictionary*_Nullable) headers;
 
 @end
 
